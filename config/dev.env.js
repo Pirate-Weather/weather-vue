@@ -6,7 +6,7 @@ module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',
   API_KEY: keys.dev,
   API_URL: {
-    geocode: '"http://localhost:3000/geocode/v1/json?"',
-    weather: '"http://localhost:3000/weather/v1/json?"'
+    geocode: '"https://pirateweather-api.herokuapp.com/geocode/v1/json?"',
+    weather: '"https://pirateweather-api.herokuapp.com/weather/v1/json?"'
   }
 })
