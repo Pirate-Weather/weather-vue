@@ -11,9 +11,9 @@
 
 module.exports = {
   dev: {
-    google: '"AIzaSyCeA7oWIZYU-F_pfDqsJLx3H6xkLhFCPJA"'
+    google: '"AIzaSyDVgzAMACiyxjBu3Oq5e_kZWbFRwcdOkuI"'
   },
   prod: {
-    google: '"AIzaSyCeA7oWIZYU-F_pfDqsJLx3H6xkLhFCPJA"'
+    google: '"AIzaSyDVgzAMACiyxjBu3Oq5e_kZWbFRwcdOkuI"'
   }
 }

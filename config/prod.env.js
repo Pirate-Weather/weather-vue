@@ -4,7 +4,7 @@ module.exports = {
   NODE_ENV: '"production"',
   API_KEY: keys.prod,
   API_URL: {
-    geocode: '"https://api.weather.kmr.io/geocode/v1/json?"',
-    weather: '"https://api.weather.kmr.io/weather/v1/json?"'
+    geocode: '"http://192.168.1.236:3000/geocode/v1/json?"',
+    weather: '"http://192.168.1.236:3000/weather/v1/json?"'
   }
 }
