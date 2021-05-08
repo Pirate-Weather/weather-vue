@@ -1,12 +1,12 @@
 <template>
   <ul class="forecast">
-    <li class="day" v-for="day in daily">
-      <div>{{ dayOfWeek(day.time * 1000, store.weather.timezone) }}</div>
-      <div class="icon">
-        <WeatherIcon :icon="day.icon"></WeatherIcon>
-      </div>
-      <strong>{{ Math.round(day.temperatureMax) }}°</strong>
-      <div>{{ Math.round(day.temperatureMin) }}°</div>
+    <li class="hour" v-for="(hour, ind) in hourly2(hourly)">
+    <div>{{hourOfDay(hour.time * 1000, store.weather.timezone) }}</div>
+    <div class="icon">
+      <WeatherIcon :icon="hour.icon"></WeatherIcon>
+    </div>
+    <strong>{{ Math.round(hour.temperature) }}°</strong>
+     <div>{{ Math.round(hour.precipProbability * 100) }}%</div>
     </li>
   </ul>
 </template>
@@ -25,13 +25,21 @@
       store () {
         return this.$store.state
       },
-      daily () {
-        return this.$store.state.weather.daily.data
+      hourly () {
+        return this.$store.state.weather.hourly.data
       }
     },
     methods: {
-      dayOfWeek (time, zone) {
-        return moment(time).tz(zone).format('ddd')
+      hourOfDay (time, zone) {
+        return moment(time).tz(zone).format('h a')
+      },
+      hourly2 (hourly) {
+        var hourly2 = []
+        var i = []
+        for (i = 0; i < 16; i = i + 2) {
+          hourly2.push(hourly[i])
+        }
+        return hourly2
       }
     }
   }
@@ -51,7 +59,7 @@
     flex: 1;
   }
 
-  .day {
+  .hour {
     color: $accent;
     font-size: 16px;
     line-height: 1.6;

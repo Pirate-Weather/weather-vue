@@ -5,6 +5,7 @@
 
       <div class="weather" v-if="store.appStatus.state === 'loaded'">
         <Current class="fadeIn"></Current>
+        <ForecastHour class="fadeIn"></ForecastHour>
         <Forecast class="fadeIn"></Forecast>
       </div>
 
@@ -38,6 +39,7 @@
   import Search from './components/Search'
   import Current from './components/Current'
   import Forecast from './components/Forecast'
+  import ForecastHour from './components/ForecastHour'
   import Credits from './components/Credits'
   import IconRefresh from './assets/icons/ui/refresh.svg'
   import IconHelp from './assets/icons/ui/help.svg'
@@ -51,6 +53,7 @@
       Search,
       Current,
       Forecast,
+      ForecastHour,
       Credits,
       IconRefresh,
       IconHelp
@@ -106,7 +109,7 @@
   flex-direction: column;
   margin-top: 10vh;
   max-width: 800px;
-  min-height: 510px;
+  min-height: 625px;
   padding: 32px;
   position: relative;
   width: 100%;
