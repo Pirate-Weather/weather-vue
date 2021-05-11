@@ -5,6 +5,7 @@
 
       <div class="weather" v-if="store.appStatus.state === 'loaded'">
         <Current class="fadeIn"></Current>
+        <ForecasMinute class="fadeIn"></ForecasMinute>
         <ForecastHour class="fadeIn"></ForecastHour>
         <Forecast class="fadeIn"></Forecast>
       </div>
@@ -40,6 +41,7 @@
   import Current from './components/Current'
   import Forecast from './components/Forecast'
   import ForecastHour from './components/ForecastHour'
+  import ForecasMinute from './components/ForecastMinute'
   import Credits from './components/Credits'
   import IconRefresh from './assets/icons/ui/refresh.svg'
   import IconHelp from './assets/icons/ui/help.svg'
@@ -54,6 +56,7 @@
       Current,
       Forecast,
       ForecastHour,
+      ForecasMinute,
       Credits,
       IconRefresh,
       IconHelp
@@ -92,7 +95,7 @@
   align-items: center;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  /*height: 100%;*/
   justify-content: center;
 
   @media(max-width: 850px) {
@@ -109,7 +112,7 @@
   flex-direction: column;
   margin-top: 10vh;
   max-width: 800px;
-  min-height: 625px;
+  min-height: 650px;
   padding: 32px;
   position: relative;
   width: 100%;
@@ -135,7 +138,7 @@
   }
 }
 .weather {
-  flex: 1;
+  flex: none;
   margin-top: 16px;
   padding-bottom: 16px;
   position: relative;
@@ -146,7 +149,7 @@
 
   .current,
   .forecast {
-    flex: 1;
+    flex: none;
 
     @keyframes fadeIn {
       0% {
