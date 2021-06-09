@@ -1,14 +1,19 @@
 <template>
+  <div style="background-color:#E2E5E9; text-align: center;"> <strong> Hourly</strong> 
   <ul class="forecast">
     <li class="hour" v-for="(hour, ind) in hourly2(hourly)">
-    <div>{{hourOfDay(hour.time * 1000, store.weather.timezone) }}</div>
-    <div class="icon">
-      <WeatherIcon :icon="hour.icon"></WeatherIcon>
-    </div>
-    <strong>{{ Math.round(hour.temperature) }}°</strong>
-     <div>{{ Math.round(hour.precipProbability * 100) }}%</div>
+        <div>{{hourOfDay(hour.time * 1000, store.weather.timezone) }}</div>
+        <div class="icon">
+          <WeatherIcon :icon="hour.icon"></WeatherIcon>
+        </div>
+        <strong>{{ Math.round(hour.temperature) }}°</strong>
+        <div>{{ Math.round(hour.precipProbability * 100) }}%</div>
+        <div v-if="hour.icon == 'rain'">{{ Math.round(hour.precipAccumulation * 100, 2) / 10 }} {{ precpLabelRain }}</div>      
+        <div v-else-if="hour.icon == 'snow'">{{ Math.round(hour.precipAccumulation * 100, 2) / 100 }} {{ precpLabelSnow }}</div>      
+        <div v-else>{{ 0 }} {{ precpLabelRain }}</div>
     </li>
   </ul>
+  </div>
 </template>
 
 <script>
@@ -27,6 +32,22 @@
       },
       hourly () {
         return this.$store.state.weather.hourly.data
+      },
+      precpLabelRain () {
+        switch (this.store.units) {
+          case 'us':
+            return 'in'
+          case 'si':
+            return 'mm'
+        }
+      },
+      precpLabelSnow () {
+        switch (this.store.units) {
+          case 'us':
+            return 'in'
+          case 'si':
+            return 'cm'
+        }
       }
     },
     methods: {

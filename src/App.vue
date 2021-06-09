@@ -5,11 +5,15 @@
 
       <div class="weather" v-if="store.appStatus.state === 'loaded'">
         <Current class="fadeIn"></Current>
-        <ForecasMinute class="fadeIn"></ForecasMinute>
-        <ForecastHour class="fadeIn"></ForecastHour>
-        <Forecast class="fadeIn"></Forecast>
+        <ForecasMinute class="fadeIn" ></ForecasMinute>
+        <ForecastHour class="fadeIn" style="margin-top: 25px"></ForecastHour>
+        <Forecast class="fadeIn" style="margin-top: 25px"></Forecast>
+        <div class="img-container" style="margin-top: 25px">
+            <a href="https://pirateweather.net" target="_blank"><img src="./assets/home-imagec.png" alt="PirateWeather" style="height: 60px !important" ></a>                     
+            <a href="https://www.buymeacoffee.com/pirateweather" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>             
+            <iframe src="https://github.com/sponsors/alexander0042/button" title="Sponsor alexander0042" height="35" width="116" style="border: 0;"></iframe>
+        </div>
       </div>
-
       <Credits class="credits" v-else-if="store.appStatus.state === 'credits'"></Credits>
 
       <div :class="store.appStatus.state" class="loading-or-error" v-else>
@@ -101,6 +105,10 @@
   @media(max-width: 850px) {
     height: initial;
   }
+}
+
+.img-container {
+  text-align: center;
 }
 
 .weather-card {

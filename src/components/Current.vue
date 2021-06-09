@@ -22,6 +22,9 @@
 
       <ul class="col details">
         <li>
+          Feels Like: <strong>{{ Math.round(store.weather.currently.apparentTemperature) }}° {{dewPointLabel}}</strong>
+        </li>
+        <li>
           Precipitation: <strong>{{ toPercentage(store.weather.currently.precipProbability) }}%</strong>
         </li>
         <li>
@@ -34,10 +37,13 @@
           Dew Point: <strong>{{ Math.round(store.weather.currently.dewPoint) }}° {{ dewPointLabel }}</strong>
         </li>
         <li>
-          Wind: <strong>{{ store.weather.currently.windSpeed }} {{ windSpeedLabel }}</strong>
+          Wind: <strong>{{ store.weather.currently.windSpeed }} {{ windSpeedLabel }} {{ degToCompass(store.weather.currently.windBearing)}}</strong>
         </li>
         <li>
           Visibility: <strong>{{ store.weather.currently.visibility }} {{ visibilityLabel }}</strong>
+        </li>
+        <li>
+          UV Index: <strong>{{ Math.round(store.weather.currently.uvIndex) }}</strong>
         </li>
         <li>
           Sunrise: <strong>{{ timestamp(store.weather.daily.data[0].sunriseTime * 1000, store.weather.timezone)}}</strong>
@@ -104,6 +110,11 @@
       },
       toPercentage (value) {
         return Math.round(value * 100)
+      },
+      degToCompass (num) {
+        var val = Math.round((num / 22.5) + 0.5)
+        var arr = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW']
+        return arr[(val % 16)]
       }
     }
   }

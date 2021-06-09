@@ -64,9 +64,9 @@ export default {
           labels: chartTimes,
           datasets: [
             {
-              label: 'Precipitation',
+              label: 'Precipitation for the hour',
               data: chartData,
-              borderColor: '#003366'
+              borderColor: '#f79100'
             }
           ]
         },

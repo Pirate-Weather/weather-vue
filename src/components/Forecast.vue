@@ -1,4 +1,5 @@
 <template>
+   <div style="text-align: center;"> <strong> Daily</strong> 
   <ul class="forecast">
     <li class="day" v-for="day in daily">
       <div>{{ dayOfWeek(day.time * 1000, store.weather.timezone) }}</div>
@@ -7,8 +8,13 @@
       </div>
       <strong>{{ Math.round(day.temperatureMax) }}°</strong>
       <div>{{ Math.round(day.temperatureMin) }}°</div>
+      <div>{{ Math.round(day.precipProbability * 100) }}%</div>
+      <div v-if="day.icon == 'rain'">{{ Math.round(day.precipAccumulation * 100, 2) / 10 }} {{ precpLabelRain }}</div>      
+      <div v-else-if="day.icon == 'snow'">{{ Math.round(day.precipAccumulation * 100, 2) / 100 }} {{ precpLabelSnow }}</div>      
+      <div v-else>{{ 0 }} {{ precpLabelRain }}</div>      
     </li>
   </ul>
+   </div>
 </template>
 
 <script>
@@ -27,6 +33,22 @@
       },
       daily () {
         return this.$store.state.weather.daily.data
+      },
+      precpLabelRain () {
+        switch (this.store.units) {
+          case 'us':
+            return 'in'
+          case 'si':
+            return 'mm'
+        }
+      },
+      precpLabelSnow () {
+        switch (this.store.units) {
+          case 'us':
+            return 'in'
+          case 'si':
+            return 'cm'
+        }
       }
     },
     methods: {
