@@ -31,7 +31,7 @@ export default {
       switch (this.$store.state.units) {
         case 'us':
           return 'Precipitation (in)'
-        case 'si':
+        case 'ca':
           return 'Precipitation (mm)'
       }
     }

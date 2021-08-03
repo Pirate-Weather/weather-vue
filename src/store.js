@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex)
 
-let units = 'si'
+let units = 'ca'
 
 if (window.navigator.language === 'en-US') {
   units = 'us'

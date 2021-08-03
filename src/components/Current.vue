@@ -14,7 +14,7 @@
             <div>{{ Math.round(store.weather.currently.temperature) }}</div>
             <sup :class="store.units">
               <button class="us" title="Switch to Fahrenheit" @click="changeUnits('us')">°F</button>
-              <button class="si" title="Switch to Celsius" @click="changeUnits('si')">°C</button>
+              <button class="ca" title="Switch to Celsius" @click="changeUnits('ca')">°C</button>
             </sup>
           </div>
         </div>
@@ -71,7 +71,7 @@
         switch (this.store.units) {
           case 'us':
             return 'F'
-          case 'si':
+          case 'ca':
             return 'C'
         }
       },
@@ -82,7 +82,7 @@
         switch (this.store.units) {
           case 'us':
             return 'miles'
-          case 'si':
+          case 'ca':
             return 'km'
         }
       },
@@ -90,7 +90,7 @@
         switch (this.store.units) {
           case 'us':
             return 'mph'
-          case 'si':
+          case 'ca':
             return 'kph'
         }
       }
@@ -198,7 +198,7 @@
         padding-right: 4px;
       }
 
-      .si {
+      .ca {
         border-left: 1px solid #ddd;
         padding-left: 4px;
       }
@@ -209,13 +209,13 @@
           pointer-events: none;
         }
 
-        .si {
+        .ca {
           color: $accentLight;
         }
       }
 
-      &.si {
-        .si {
+      &.ca {
+        .ca {
           font-weight: bold;
           pointer-events: none;
         }

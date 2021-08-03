@@ -38,7 +38,7 @@
         switch (this.store.units) {
           case 'us':
             return 'in'
-          case 'si':
+          case 'ca':
             return 'mm'
         }
       },
@@ -46,7 +46,7 @@
         switch (this.store.units) {
           case 'us':
             return 'in'
-          case 'si':
+          case 'ca':
             return 'cm'
         }
       }
