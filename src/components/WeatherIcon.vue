@@ -9,6 +9,7 @@
     <WeatherIconSleet v-if="icon === 'sleet'"></WeatherIconSleet>
     <WeatherIconSnow v-if="icon === 'snow'"></WeatherIconSnow>
     <WeatherIconWind v-if="icon === 'wind'"></WeatherIconWind>
+    <WeatherIconFog v-if="icon === 'fog'"></WeatherIconFog>
   </div>
 </template>
 
@@ -22,6 +23,7 @@
   import WeatherIconSleet from '../assets/icons/weather/sleet.svg'
   import WeatherIconSnow from '../assets/icons/weather/snow.svg'
   import WeatherIconWind from '../assets/icons/weather/wind.svg'
+  import WeatherIconFog from '../assets/icons/weather/fog.svg'
 
   export default {
     name: 'weatherIcon',
@@ -35,7 +37,8 @@
       WeatherIconRain,
       WeatherIconSleet,
       WeatherIconSnow,
-      WeatherIconWind
+      WeatherIconWind,
+      WeatherIconFog
     }
   }
 </script>
