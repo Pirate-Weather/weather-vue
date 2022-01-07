@@ -1,4 +1,10 @@
-FROM node:lts-alpine as api
+FROM node:lts-alpine3.9  as api
+
+RUN apk update
+RUN apk add git
+RUN apk add python2
+RUN apk add make
+RUN apk add g++
 
 RUN apk update
 RUN apk add git
@@ -19,11 +25,22 @@ COPY . .
 #RUN npm run build
 
 # replace dark sky with pirate weather
-RUN sed -i 's/api.darksky.net/api.pirateweather.net/g' /app/node_modules/dark-sky/dark-sky-api.js
+RUN sed -i 's/api.darksky.net/dev.pirateweather.net/g' /app/node_modules/dark-sky/dark-sky-api.js
+
+# Include minutely data
+RUN sed -i 's/minutely,hourly,flags/hourly,flags/g' /app/api/routes/weather.js
 
 EXPOSE $PORT
 CMD [ "node", "api/app.js" ]
 
+
+FROM node:lts-alpine3.9  as web
+
+RUN apk update
+RUN apk add git
+RUN apk add python2
+RUN apk add make
+RUN apk add g++
 
 FROM node:lts-alpine as web
 
@@ -46,7 +63,7 @@ COPY . .
 #RUN npm run build
 
 # replace dark sky with pirate weather
-RUN sed -i 's/api.darksky.net/api.pirateweather.net/g' /app/node_modules/dark-sky/dark-sky-api.js
+RUN sed -i 's/api.darksky.net/dev.pirateweather.net/g' /app/node_modules/dark-sky/dark-sky-api.js
 
 EXPOSE $PORT
 CMD [ "node", "build/dev-server.js" ]
