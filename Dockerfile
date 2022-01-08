@@ -28,7 +28,7 @@ COPY . .
 RUN sed -i 's/api.darksky.net/dev.pirateweather.net/g' /app/node_modules/dark-sky/dark-sky-api.js
 
 # Include minutely data
-RUN sed -i 's/minutely,hourly,flags/hourly,flags/g' /app/api/routes/weather.js
+RUN sed -i 's/minutely,hourly,flags/alerts,flags/g' /app/api/routes/weather.js
 
 EXPOSE $PORT
 CMD [ "node", "api/app.js" ]
