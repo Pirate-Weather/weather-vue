@@ -2,6 +2,9 @@
 Weather app using Vue.js, Google Maps Geocoding, and Pirate Weather-Dark Sky.
 ![alt tag](https://raw.githubusercontent.com/krestaino/weather-vue/master/static/images/og.jpg)
 
+# Status
+This project is currently dormant. I'll be keeping it around in case it's ever useful to someone, but for now, the main Pirate Weather homepage is [MerrySky](https://merrysky.net/), since it's much better than this was!
+
 ## Getting Started
 This is a fork of [Weather Vue](https://github.com/krestaino/weather-vue) designed to work with [Pirate Weather](https://pirateweather.net) and Heroku via Docker. The app is otherwise the same, but split into a two-part dockerfile (web and api), each of which needs to be deployed to a separate instance. Key changes are separating the two parts into images, adding PORT references, and changing references from Dark Sky to Pirate Weather (via sed). To deploy:
 ``` bash
