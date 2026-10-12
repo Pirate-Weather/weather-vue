@@ -79,50 +79,56 @@ const getWeatherIcon = (iconString) => {
 
 <template>
   <main class="weather-container">
-    <h1>Weather App</h1>
-
-    <!-- Search Box -->
-    <div class="search-box">
+  <div class="relative grid min-h-screen grid-rows-[1fr_auto_1fr] bg-white [--pattern-fg:var(--color-gray-950)]/5 dark:bg-gray-950 dark:[--pattern-fg:var(--color-white)]/10">
+  <div class="row-start-2 bg-gray-100 p-1 dark:bg-white/10 w-300 m-auto">
+    <div class="rounded-xl bg-white p-10 text-gray-700 dark:bg-gray-950 dark:text-gray-300">
+      <!-- Search Box -->
+    <div class="flex gap-2 justify-between">
       <input 
         v-model="searchQuery" 
         @keyup.enter="searchLocations"
-        placeholder="Search city or location..." 
+        placeholder="Search city or location..."
+        class="p-3 rounded-sm outline outline-black/5 dark:-outline-offset-1 dark:outline-white/10"
       />
-      <button @click="searchLocations">Search</button>
+      <button @click="searchLocations" class="p-3 rounded-sm bg-orange-500 hover:bg-orange-700">Search</button>
     </div>
 
     <!-- Nominatim Results Dropdown -->
-    <ul v-if="locations.length" class="dropdown">
-      <li v-for="loc in locations" :key="loc.place_id" @click="selectLocation(loc)">
+    <ul v-if="locations.length" class="absolute p-5 mt-2 rounded-sm outline outline-black/5 dark:-outline-offset-1 dark:outline-white/10 bg-white text-gray-700 dark:bg-gray-950 dark:text-gray-300">
+      <li v-for="loc in locations" :key="loc.place_id" @click="selectLocation(loc)" class="p-2 hover:bg-orange-700">
         {{ loc.display_name }}
       </li>
     </ul>
-
+    </div>
+    <div class="rounded-xl bg-white p-10 text-gray-700 dark:bg-gray-950 dark:text-gray-300">
     <!-- Weather Display Panel -->
     <div v-if="weather" class="weather-dashboard">
-      <h2>{{ selectedLocation?.display_name }}</h2>
+      <h2 class="text-2xl">{{ selectedLocation?.display_name }}</h2>
 
       <!-- Current Conditions Card -->
-      <div class="current-card">
-        <div class="icon-large">{{ getWeatherIcon(weather.currently.icon) }}</div>
-        <div class="temp-info">
+      <div class="flex mt-2 mb-2">
+        <div class="text-6xl">{{ getWeatherIcon(weather.currently.icon) }}</div>
+        <div class="text-2xl">
           <span class="temp">{{ Math.round(weather.currently.temperature) }}°</span>
           <p class="summary">{{ weather.currently.summary }}</p>
         </div>
       </div>
 
       <!-- 7-Day Forecast Grid -->
-      <h3>7-Day Forecast</h3>
-      <div class="forecast-grid">
-        <div v-for="day in weather.daily.data" :key="day.time" class="forecast-day">
-          <span class="day-name">{{ formatDay(day.time) }}</span>
-          <span class="day-icon">{{ getWeatherIcon(day.icon) }}</span>
-          <div class="day-temps">
+      <h3 class="text-xl text-center mt-5 mb-5">7-Day Forecast</h3>
+      <div class="grid gap-2">
+        <div v-for="day in weather.daily.data" :key="day.time" class="flex justify-between p-3 rounded-sm outline outline-black/5 dark:-outline-offset-1 dark:outline-white/10 bg-white text-gray-700 dark:bg-gray-950 dark:text-gray-300">
+          <span class="text-lg">{{ formatDay(day.time) }}</span>
+          <span class="text-xl">{{ getWeatherIcon(day.icon) }}</span>
+          <div class="text-lg flex gap-2">
             <span class="high">{{ Math.round(day.temperatureHigh) }}°</span>
             <span class="low">{{ Math.round(day.temperatureLow ?? day.temperatureMin) }}°</span>
           </div>
         </div>
       </div>
     </div>
+    </div>
+  </div>
+</div>
   </main>
 </template>
