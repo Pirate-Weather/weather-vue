@@ -37,11 +37,17 @@ const selectLocation = async (loc) => {
     return
   }
 
+    const useMock = true; // Toggle this to false when you're ready to use the real API
+
   try {
     // Pirate Weather endpoint format: /forecast/[key]/[lat],[lon]
-    const response = await axios.get(`https://api.pirateweather.net/forecast/${apiKey}/${loc.lat},${loc.lon}`, {
-      params: { units: 'si' } // Use 'us' for Fahrenheit
-    })
+    const url = useMock 
+      ? '/mock-weather.json' 
+      : `https://api.pirateweather.net/forecast/${apiKey}/${loc.lat},${loc.lon}`;
+
+    const response = await axios.get(url, {
+      params: useMock ? {} : { units: 'si' }
+    });
     weather.value = response.data
   } catch (error) {
     console.error('Weather fetch error:', error)
