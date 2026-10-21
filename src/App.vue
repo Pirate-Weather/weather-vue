@@ -32,7 +32,8 @@ const loading = ref(false)
 
 // User Preferences
 const units = ref('si') // 'si' base for calculations (Celsius, m/s, km)
-const alertExpanded = ref(false)
+const expandedAlerts = ref({})
+const expandedDays = ref({})
 
 // Search locations via Nominatim with address details to format clean names
 const searchLocations = async () => {
@@ -97,13 +98,13 @@ const selectLocation = async (loc) => {
     return
   }
 
-  const useMock = false // Set to true to use mock-weather.json
+  const useMock = false
   loading.value = true
 
   try {
     const url = useMock 
       ? '/mock-weather.json' 
-      : `https://api.pirateweather.net/forecast/${apiKey}/${loc.lat},${loc.lon}?units=si&version=2&include=airqualitydetails&aqiunits=us`
+      : `https://api.pirateweather.net/forecast/${apiKey}/${loc.lat},${loc.lon}?units=si&version=2&include=airqualitydetails,day_night_forecast&aqiunits=us`
 
     const response = await axios.get(url)
     rawWeather.value = response.data
@@ -180,6 +181,14 @@ const getWeatherIconComponent = (iconString) => {
     default: return Sun
   }
 }
+
+const getDayPart = (index, isNight = false) => {
+  if (rawWeather.value?.day_night?.data) {
+    const idx = index * 2 + (isNight ? 1 : 0)
+    return rawWeather.value.day_night.data[idx]
+  }
+  return null
+}
 </script>
 
 <template>
@@ -189,8 +198,6 @@ const getWeatherIconComponent = (iconString) => {
         
         <!-- Header Controls: Search & Unit Toggle -->
         <div class="flex flex-col sm:flex-row gap-3 items-center justify-between bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
-          
-          <!-- Search Box -->
           <div class="relative w-full sm:w-96">
             <div class="flex items-center gap-2 bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
               <Search class="w-5 h-5 text-slate-400 shrink-0" />
@@ -207,8 +214,6 @@ const getWeatherIconComponent = (iconString) => {
                 Search
               </button>
             </div>
-
-            <!-- Dropdown -->
             <ul v-if="locations.length" class="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
               <li 
                 v-for="loc in locations" 
@@ -221,7 +226,6 @@ const getWeatherIconComponent = (iconString) => {
             </ul>
           </div>
 
-          <!-- Unit Toggle Only -->
           <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
             <button 
               @click="units = units === 'si' ? 'us' : 'si'"
@@ -236,30 +240,36 @@ const getWeatherIconComponent = (iconString) => {
         <!-- Weather Panel -->
         <div v-if="weather" class="space-y-6">
           
-          <!-- Alerts Banner -->
-          <div v-if="weather.alerts && weather.alerts.length" class="bg-red-50 border border-red-200 rounded-2xl p-4 transition-all">
-            <div @click="alertExpanded = !alertExpanded" class="flex items-start justify-between cursor-pointer gap-3">
-              <div class="flex items-start gap-3">
-                <AlertTriangle class="w-6 h-6 text-red-500 shrink-0 mt-0.5" />
-                <div>
-                  <h4 class="font-semibold text-red-800 text-sm flex items-center gap-2">
-                    {{ weather.alerts[0].title }}
-                    <span class="text-xs font-normal underline opacity-80">(Click to {{ alertExpanded ? 'collapse' : 'expand' }})</span>
-                  </h4>
-                  <p v-if="!alertExpanded" class="text-xs text-red-700 mt-1 line-clamp-1">{{ weather.alerts[0].description }}</p>
+          <!-- Multiple Alerts Banners -->
+          <div v-if="weather.alerts && weather.alerts.length" class="space-y-3">
+            <div 
+              v-for="(alert, index) in weather.alerts" 
+              :key="index"
+              class="border rounded-2xl p-4 transition-all"
+              :class="alert.severity === 'severe' || alert.severity === 'warning' ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'"
+            >
+              <div @click="expandedAlerts[index] = !expandedAlerts[index]" class="flex items-start justify-between cursor-pointer gap-3">
+                <div class="flex items-start gap-3">
+                  <AlertTriangle class="w-6 h-6 shrink-0 mt-0.5" :class="alert.severity === 'severe' ? 'text-red-600' : 'text-amber-500'" />
+                  <div>
+                    <h4 class="font-semibold text-sm flex items-center gap-2" :class="alert.severity === 'severe' ? 'text-red-900' : 'text-amber-900'">
+                      {{ alert.title }}
+                      <span class="text-xs font-normal underline opacity-80">(Click to {{ expandedAlerts[index] ? 'collapse' : 'expand' }})</span>
+                    </h4>
+                    <p v-if="!expandedAlerts[index]" class="text-xs mt-1 line-clamp-1" :class="alert.severity === 'severe' ? 'text-red-700' : 'text-amber-700'">{{ alert.description }}</p>
+                  </div>
                 </div>
+                <component :is="expandedAlerts[index] ? ChevronUp : ChevronDown" class="w-5 h-5 shrink-0" :class="alert.severity === 'severe' ? 'text-red-600' : 'text-amber-500'" />
               </div>
-              <component :is="alertExpanded ? ChevronUp : ChevronDown" class="w-5 h-5 text-red-500 shrink-0" />
-            </div>
-            <div v-if="alertExpanded" class="mt-3 pt-3 border-t border-red-200 text-xs text-red-700 space-y-2 whitespace-pre-line leading-relaxed">
-              {{ weather.alerts[0].description }}
+              <div v-if="expandedAlerts[index]" class="mt-3 pt-3 border-t text-xs space-y-2 whitespace-pre-line leading-relaxed" :class="alert.severity === 'severe' ? 'border-red-200 text-red-700' : 'border-amber-200 text-amber-700'">
+                {{ alert.description }}
+              </div>
             </div>
           </div>
 
           <!-- Current Conditions Card -->
-          <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-              
+          <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-sm border border-slate-200 space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div class="space-y-2">
                 <div class="flex items-center gap-2 text-slate-500 text-sm font-medium">
                   <Compass class="w-4 h-4 text-orange-500" />
@@ -280,69 +290,82 @@ const getWeatherIconComponent = (iconString) => {
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Metrics Grid (Fixed Sizing) -->
-              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full md:w-auto">
-                <div class="h-24 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
-                  <div class="flex items-center gap-1.5 text-slate-400 text-xs">
-                    <Droplets class="w-3.5 h-3.5 text-blue-500" />
-                    <span>Humidity</span>
-                  </div>
-                  <span class="text-base font-semibold">{{ Math.round(weather.currently.humidity * 100) }}%</span>
+            <!-- 6 Metrics Items Grid Below -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-4 border-t border-slate-100">
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Wind class="w-3.5 h-3.5 text-teal-500" />
+                  <span>Wind</span>
                 </div>
-
-                <div class="h-24 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
-                  <div class="flex items-center gap-1.5 text-slate-400 text-xs">
-                    <Wind class="w-3.5 h-3.5 text-teal-500" />
-                    <span>Wind</span>
-                  </div>
-                  <div>
-                    <div class="text-base font-semibold">
-                      {{ formatWindSpeed(weather.currently.windSpeed) }} <span class="text-xs font-normal">{{ units === 'si' ? 'km/h' : 'mph' }}</span> {{ getWindDirection(weather.currently.windBearing) }}
-                    </div>
-                    <div v-if="weather.currently.windGust" class="text-[10px] text-slate-400 mt-0.5">
-                      Gusts: {{ formatWindSpeed(weather.currently.windGust) }}
-                    </div>
-                  </div>
-                </div>
-
-                <div class="h-24 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
-                  <div class="flex items-center gap-1.5 text-slate-400 text-xs">
-                    <Eye class="w-3.5 h-3.5 text-purple-500" />
-                    <span>Visibility</span>
-                  </div>
-                  <span class="text-base font-semibold">{{ formatVisibility(weather.currently.visibility) }} <span class="text-xs font-normal">{{ units === 'si' ? 'km' : 'mi' }}</span></span>
-                </div>
-
-                <div class="h-24 bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between">
-                  <div class="flex items-center gap-1.5 text-slate-400 text-xs">
-                    <Activity class="w-3.5 h-3.5 text-amber-500" />
-                    <span>AQI</span>
-                  </div>
-                  <span class="text-base font-semibold">{{ weather.currently.airQualityIndex ?? 'N/A' }}</span>
-                </div>
+                <span class="text-sm font-semibold">
+                  {{ formatWindSpeed(weather.currently.windSpeed) }} <span class="text-[10px] font-normal">{{ units === 'si' ? 'km/h' : 'mph' }}</span>
+                </span>
               </div>
 
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Activity class="w-3.5 h-3.5 text-amber-500" />
+                  <span>AQI</span>
+                </div>
+                <span class="text-sm font-semibold">{{ weather.currently.airQualityIndex ?? 'N/A' }}</span>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Compass class="w-3.5 h-3.5 text-orange-500" />
+                  <span>Pressure</span>
+                </div>
+                <span class="text-sm font-semibold">{{ weather.currently.pressure ? Math.round(weather.currently.pressure) : 'N/A' }} <span class="text-[10px] font-normal">hPa</span></span>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Thermometer class="w-3.5 h-3.5 text-red-500" />
+                  <span>Dew Point</span>
+                </div>
+                <span class="text-sm font-semibold">{{ formatTemp(weather.currently.dewPoint) }}°</span>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Droplets class="w-3.5 h-3.5 text-blue-500" />
+                  <span>Humidity</span>
+                </div>
+                <span class="text-sm font-semibold">{{ Math.round(weather.currently.humidity * 100) }}%</span>
+              </div>
+
+              <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex flex-col justify-between h-20">
+                <div class="flex items-center gap-1.5 text-slate-400 text-xs">
+                  <Eye class="w-3.5 h-3.5 text-purple-500" />
+                  <span>Visibility</span>
+                </div>
+                <span class="text-sm font-semibold">{{ formatVisibility(weather.currently.visibility) }} <span class="text-[10px] font-normal">{{ units === 'si' ? 'km' : 'mi' }}</span></span>
+              </div>
             </div>
           </div>
 
-         <!-- Minutely Precipitation Forecast (Unified Timeline) -->
+          <!-- Minutely Precipitation Forecast (Unified Timeline) -->
           <div v-if="hasPrecipitation" class="bg-blue-50/50 border border-blue-200 rounded-3xl p-6 shadow-sm">
-            <div class="flex items-center gap-2 text-blue-800 text-sm font-semibold mb-3">
-              <CloudRain class="w-5 h-5 text-blue-500" />
-              <span>{{ weather.minutely.summary }}</span>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2 text-blue-800 text-sm font-semibold">
+                <CloudRain class="w-5 h-5 text-blue-500" />
+                <span>{{ weather.minutely.summary }}</span>
+              </div>
+              <div class="text-xs text-blue-700 font-medium">
+                Dew Point: {{ formatTemp(weather.minutely.data[0]?.dewPoint) }}°
+              </div>
             </div>
             
-            <!-- Unified container box for all bars -->
             <div class="bg-white/80 border border-blue-100 rounded-2xl p-4">
               <div class="flex items-end gap-1 overflow-x-auto pb-2 h-20 scrollbar-thin">
                 <div 
                   v-for="min in weather.minutely.data.filter((_, i) => i % 2 === 0)" 
                   :key="min.time" 
                   class="flex-1 flex flex-col items-center justify-end gap-1 min-w-[12px] h-full group relative"
-                  :title="`${formatHour(min.time)}: ${Math.round(min.precipProbability * 100)}% chance (${min.precipIntensity} mm/h)`"
+                  :title="`${formatHour(min.time)}: ${Math.round(min.precipProbability * 100)}% chance, Intensity: ${min.precipIntensity} mm/h, Dew Point: ${formatTemp(min.dewPoint)}°`"
                 >
-                  <!-- Bar height scales with intensity -->
                   <div 
                     class="w-full rounded-t transition-all" 
                     :class="getPrecipColor(min)"
@@ -350,11 +373,19 @@ const getWeatherIconComponent = (iconString) => {
                   ></div>
                 </div>
               </div>
-              <!-- Timeline labels below -->
               <div class="flex justify-between text-[10px] text-slate-400 mt-2 pt-2 border-t border-slate-100">
                 <span>Now</span>
                 <span>+30 min</span>
                 <span>+60 min</span>
+              </div>
+
+              <!-- Minutely Legend Underneath -->
+              <div class="flex flex-wrap items-center justify-center gap-4 mt-3 pt-3 border-t border-blue-100/60 text-[11px] text-slate-600">
+                <span class="font-semibold text-slate-700">Legend:</span>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-200 inline-block"><span>Very Light</span></span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-green-400 inline-block"><span>Light</span></span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-yellow-400 inline-block"><span>Medium</span></span></div>
+                <div class="flex items-center gap-1.5"><span class="w-3 h-3 rounded bg-red-600 inline-block"><span>Heavy</span></span></div>
               </div>
             </div>
           </div>
@@ -375,27 +406,72 @@ const getWeatherIconComponent = (iconString) => {
             </div>
           </div>
 
-          <!-- 7-Day Forecast Grid -->
+          <!-- 7-Day Forecast Grid (Expandable Day/Night) -->
           <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
             <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">7-Day Forecast</h3>
             <div class="space-y-3">
               <div 
-                v-for="day in weather.daily.data" 
-                :key="day.time" 
-                class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100"
+                v-for="(day, index) in weather.daily.data" 
+                :key="day.time"
+                class="bg-slate-50 rounded-2xl border border-slate-100 overflow-hidden transition"
               >
-                <div class="w-32">
-                  <span class="font-medium text-slate-700 block">{{ formatDay(day.time) }}</span>
-                  <span class="text-xs text-slate-400">{{ formatDate(day.time) }}</span>
+                <!-- Summary Row (Clickable to Expand) -->
+                <div 
+                  @click="expandedDays[index] = !expandedDays[index]"
+                  class="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-100/60 transition"
+                >
+                  <div class="w-32">
+                    <span class="font-medium text-slate-700 block">{{ formatDay(day.time) }}</span>
+                    <span class="text-xs text-slate-400">{{ formatDate(day.time) }}</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <component :is="getWeatherIconComponent(day.icon)" class="w-5 h-5 text-orange-500" />
+                    <span class="text-xs text-slate-500 hidden sm:inline truncate max-w-xs">{{ day.summary }}</span>
+                  </div>
+                  <div class="flex items-center gap-4 text-sm">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold">{{ formatTemp(day.temperatureHigh) }}°</span>
+                      <span class="text-slate-400">{{ formatTemp(day.temperatureLow ?? day.temperatureMin) }}°</span>
+                    </div>
+                    <component :is="expandedDays[index] ? ChevronUp : ChevronDown" class="w-4 h-4 text-slate-400" />
+                  </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <component :is="getWeatherIconComponent(day.icon)" class="w-5 h-5 text-orange-500" />
-                  <span class="text-xs text-slate-500 hidden sm:inline">{{ day.summary }}</span>
+
+                <!-- Expanded Day / Night Details Section -->
+                <div v-if="expandedDays[index]" class="px-4 pb-4 pt-1 border-t border-slate-200/60 bg-white/50 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <!-- Day Breakdown -->
+                  <div class="p-3 bg-orange-50/50 border border-orange-100 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                      <div class="font-semibold text-orange-900 flex items-center gap-1.5">
+                        <component :is="getWeatherIconComponent(getDayPart(index, false)?.icon)" class="w-4 h-4 text-orange-500" />
+                        <span>Day Forecast</span>
+                      </div>
+                      <span class="text-sm font-bold text-orange-900">{{ formatTemp(getDayPart(index, false)?.temperature ?? day.temperatureHigh) }}°</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">{{ getDayPart(index, false)?.summary || day.summary }}</p>
+                    <div class="flex justify-between pt-1 border-t border-orange-100 text-[11px] text-slate-500">
+                      <span>Wind: <strong>{{ formatWindSpeed(getDayPart(index, false)?.windSpeed ?? day.windSpeed) }} {{ units === 'si' ? 'km/h' : 'mph' }}</strong></span>
+                      <span>UV: <strong>{{ getDayPart(index, false)?.uvIndex ?? day.uvIndex ?? 'N/A' }}</strong></span>
+                    </div>
+                  </div>
+
+                  <!-- Night Breakdown -->
+                  <div class="p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl space-y-2">
+                    <div class="flex items-center justify-between">
+                      <div class="font-semibold text-indigo-900 flex items-center gap-1.5">
+                        <component :is="getWeatherIconComponent(getDayPart(index, true)?.icon)" class="w-4 h-4 text-indigo-500" />
+                        <span>Night Forecast</span>
+                      </div>
+                      <span class="text-sm font-bold text-indigo-900">{{ formatTemp(getDayPart(index, true)?.temperature ?? day.temperatureLow ?? day.temperatureMin) }}°</span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed">{{ getDayPart(index, true)?.summary || day.summary }}</p>
+                    <div class="flex justify-between pt-1 border-t border-indigo-100 text-[11px] text-slate-500">
+                      <span>Humidity: <strong>{{ Math.round((getDayPart(index, true)?.humidity ?? day.humidity ?? 0) * 100) }}%</strong></span>
+                      <span>Dew Point: <strong>{{ formatTemp(getDayPart(index, true)?.dewPoint ?? day.dewPoint) }}°</strong></span>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center gap-3 text-sm">
-                  <span class="font-bold">{{ formatTemp(day.temperatureHigh) }}°</span>
-                  <span class="text-slate-400">{{ formatTemp(day.temperatureLow ?? day.temperatureMin) }}°</span>
-                </div>
+
               </div>
             </div>
           </div>
