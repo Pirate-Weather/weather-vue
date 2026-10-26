@@ -1,61 +1,64 @@
 ﻿# Weather Vue
-Weather app using Vue.js, Google Maps Geocoding, and Pirate Weather-Dark Sky.
-![alt tag](https://raw.githubusercontent.com/krestaino/weather-vue/master/static/images/og.jpg)
+Weather app using Vue 3, Tailwind CSS, OpenStreetMap Nominatim geocoding, and [Pirate Weather](https://pirateweather.net).
+
+![Weather Vue screenshot](screenshot.png)
 
 # Status
 This project is currently dormant. I'll be keeping it around in case it's ever useful to someone, but for now, the main Pirate Weather homepage is [MerrySky](https://merrysky.net/), since it's much better than this was!
 
+## Features
+* Location search powered by OpenStreetMap Nominatim
+* Current conditions with wind, AQI, pressure, dew point, humidity and visibility
+* Minute-by-minute precipitation timeline with an intensity legend (shown when precipitation is expected)
+* 24-hour forecast with chance of precipitation and expected amount
+* 7-day forecast with US AQI colour-coded badges and expandable day/night breakdowns
+* Weather alerts
+* Metric / Imperial toggle
+* Light / Dark mode toggle (follows your system setting until changed)
+
 ## Getting Started
-This is a fork of [Weather Vue](https://github.com/krestaino/weather-vue) designed to work with [Pirate Weather](https://pirateweather.net) and Heroku via Docker. The app is otherwise the same, but split into a two-part dockerfile (web and api), each of which needs to be deployed to a separate instance. Key changes are separating the two parts into images, adding PORT references, and changing references from Dark Sky to Pirate Weather (via sed). To deploy:
+You'll need a free [Pirate Weather API key](https://pirateweather.net/en/latest/#getting-started).
+
 ``` bash
-# clone repo and API submodule
-git clone https://github.com/alexander0042/weather-vue.git --recursive
+# clone the repo
+git clone https://github.com/Pirate-Weather/weather-vue.git
 cd weather-vue
-# to fetch submodule if already cloned without the `--recursive` flag
-git submodule update --init
-# make copies of the two keys files from the examples (keys.js)
-cp keys.js.example keys.js
-cp api/keys.js.example api/keys.js
-# edit the files with real keys 
-# build both docker images
-docker build -t weather-vue/weather-vue --target api -t weather:api .
-docker build -t weather-vue/weather-vue --target web -t weather:web .
-# Tag with Heroku app- both must be called web
-docker tag weather:api registry.heroku.com/pirateweather-api/web
-docker tag weather:web registry.heroku.com/pirate-web/web
-# Push to Heroku
-docker push registry.heroku.com/pirateweather-api/web
-docker push registry.heroku.com/pirate-web/web
-# Release images
-heroku container:release -a pirateweather-api web
-heroku container:release -a pirate-web web
-```
-
-## API Backend
-The API backend for this project is a REST API using Node and Express. It's included in this project as a submodule and located in `./api`. The repo can be found [here](https://github.com/krestaino/weather-api). This backend API fetches geolocation data from Google and weather data from Dark Sky and returns it to the Weather Vue app.
-
-Rename `./api/keys.js.example` to `./api/keys.js` and add your [Dark Sky API](https://darksky.net/dev/) and [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/get-api-key) keys.  
-
-## Build Setup
-Rename `./keys.js.example` to `./keys.js` and add your [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/get-api-key) keys. This API key is for the background map which uses the Google Maps JavaScript API. The `prod` key is exposed in your frontend code, so make sure you restrict the HTTP referrer to only allow requests from your production URL. This can be done in the Google API Console. The `dev` key is not included in production code, so it doesn't need the same restrictions.
-``` bash
 # install dependencies
 npm install
-# serve with hot reload at localhost:8080 and API at localhost:3000
-npm run dev
-# build for production with minification
-npm run build
-# build for production and view the bundle analyzer report
-npm run build --report
+# copy the example environment file and add your Pirate Weather API key
+cp .env.example .env
 ```
-For detailed explanation on how things work, check out the [Vue.js Webpack guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+Then set your key in `.env`:
+```
+VITE_PIRATE_WEATHER_API_KEY=your_actual_pirate_weather_key_here
+```
+
+## Build Setup
+``` bash
+# serve with hot reload
+npm run dev
+# build for production
+npm run build
+# preview the production build locally
+npm run preview
+```
+
+### API Key Visibility
+This app calls Pirate Weather directly from the browser, so your API key is **not private**. Because it's a `VITE_` variable, it is included in the built JavaScript, and it appears in the request URL in the browser's developer tools (Network tab). No build setting or browser option can hide it.
+
+This is fine for local use or a personal deployment. If you host it publicly, anyone could copy the key and use your quota. To keep the key private, run a small server-side proxy (for example a Cloudflare Worker, a Netlify/Vercel function, or a reverse proxy on your own server) that adds the key to the request, and point the app at the proxy instead of `api.pirateweather.net`.
+
+### Mock Data
+To work on the layout without using API calls, set `useMock` to `true` in `src/App.vue`. Weather data will then be loaded from `public/mock-weather.json` instead of the Pirate Weather API.
 
 ## Built With
 * [Vue.js](https://vuejs.org/)
-* [Dark Sky API](https://darksky.net/dev/)
-* [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript/get-api-key)
-* [Google Geocoding API](https://developers.google.com/maps/documentation/geocoding/get-api-key)
-* [Google Places API](https://developers.google.com/places/web-service/autocomplete)
+* [Vite](https://vite.dev/)
+* [Tailwind CSS](https://tailwindcss.com/)
+* [Lucide Icons](https://lucide.dev/)
+* [Pirate Weather API](https://pirateweather.net)
+* [OpenStreetMap Nominatim](https://nominatim.org/)
 
-## License 
+## License
 This project is licensed under the MIT License - see the LICENSE.md file for details

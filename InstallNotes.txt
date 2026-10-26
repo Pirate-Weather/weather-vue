@@ -1,2 +1,0 @@
-cd F:\Repos\pirate-vue
-npm install --python=C:\Python27\python.exe
